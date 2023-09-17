@@ -13,17 +13,12 @@ app.config['SECRET_KEY'] = "opop"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./database/user.db'
 init_app(app)
-migrate = Migrate(app, db, render_as_batch=True)
+migrate = Migrate(app, db)
 
 
 @app.route("/")
 def intro_page():
-    return "hello world"
-
-
-@app.route("/user/<username>")
-def private(username):
-    return f"This is your private area, {username}"
+    return ""
 
 
 @app.route("/all", methods=["GET"])
@@ -38,6 +33,18 @@ def get_all_users():
     return jsonify(response)
 
 
+@app.route("/user/info/<user_id>", methods=["GET"])
+def get_user(user_id):
+    user_select = db.session.execute(select(User).filter_by(id=user_id))
+    user = next(user_select)[0]
+    response = {
+        "message": "Info successfully acquired",
+        "result": user.user_info()
+    }
+
+    return jsonify(response), 200
+
+
 @app.route("/create", methods=["POST"])
 def create_user():
     try:
@@ -47,13 +54,33 @@ def create_user():
         user.is_admin = json.loads(request.data)["is_admin"]
         db.session.add(user)
         db.session.commit()
-        response = {"message": "User created", "result": user.created()}
+        response = {"message": "User created", "result": user.user_info()}
         return jsonify(response), 201
     except sqlalchemy.exc.IntegrityError:
         db.session.rollback()
         result = db.session.execute(select(User).filter_by(email=json.loads(request.data)["email"]))
         response = {
-            "Message": f"This user already exists in the database with username {next(result)[0].username}",
+            "message": f"This user already exists in the database with username {next(result)[0].username}",
+
+        }
+        return jsonify(response), 400
+
+
+@app.route("/update/<user_id>", methods=["PUT"])
+def update_user(user_id):
+    try:
+        user_select = db.session.execute(select(User).filter_by(id=user_id))
+        user = next(user_select)[0]
+        user.username = json.loads(request.data)["username"]
+        user.email = json.loads(request.data)["email"]
+        user.is_admin = json.loads(request.data)["is_admin"]
+        db.session.commit()
+        response = {"message": f"User successfully updated", "result": user.user_info()}
+        return jsonify(response), 200
+    except sqlalchemy.exc.IntegrityError:
+        db.session.rollback()
+        response = {
+            "message": "User with such data probably already exists in the database",
 
         }
         return jsonify(response), 400

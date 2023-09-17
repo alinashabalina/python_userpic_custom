@@ -15,7 +15,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(255), unique=True)
     is_admin = db.Column(db.Boolean, default=False)
 
-    def created(self):
+    def user_info(self):
         return {
             "id": self.id,
             "username": self.username,
