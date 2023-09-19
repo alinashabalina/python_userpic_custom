@@ -84,3 +84,23 @@ def update_user(user_id):
 
         }
         return jsonify(response), 400
+
+
+@app.route("/delete/<user_id>", methods=["DELETE"])
+def delete_user(user_id):
+    try:
+        user_select = db.session.execute(select(User).filter_by(id=user_id))
+        user = next(user_select)[0]
+        db.session.delete(user)
+        db.session.commit()
+        response = {
+            "message": "User successfully deleted"
+        }
+        return jsonify(response), 200
+    except:
+        db.session.rollback()
+        response = {
+            "message": "User cannot be deleted from the database",
+
+        }
+        return jsonify(response), 400
