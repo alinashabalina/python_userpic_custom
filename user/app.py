@@ -94,7 +94,7 @@ def delete_user(user_id):
         db.session.delete(user)
         db.session.commit()
         response = {
-            "message": "User successfully deleted"
+            "message": f"User successfully deleted"
         }
         return jsonify(response), 200
     except:
