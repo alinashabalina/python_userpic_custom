@@ -37,14 +37,21 @@ def get_all_users():
 
 @app.route("/user/info/<user_id>", methods=["GET"])
 def get_user(user_id):
-    user_select = db.session.execute(select(User).filter_by(id=user_id))
-    user = next(user_select)[0]
-    response = {
-        "message": "Info successfully acquired",
-        "result": user.user_info()
-    }
+    try:
+        user_select = db.session.execute(select(User).filter_by(id=user_id))
+        user = next(user_select)[0]
+        response = {
+            "message": "Info successfully acquired",
+            "result": user.user_info()
+            }
 
-    return jsonify(response), 200
+        return jsonify(response), 200
+    except StopIteration:
+        response = {
+            "message": "Enter a valid user_id",
+        }
+
+        return jsonify(response), 400
 
 
 @app.route("/create", methods=["POST"])
@@ -124,13 +131,13 @@ def delete_user(user_id):
         db.session.delete(user)
         db.session.commit()
         response = {
-            "message": f"User successfully deleted"
+            "message": "User successfully deleted"
         }
         return jsonify(response), 200
-    except:
+    except StopIteration:
         db.session.rollback()
         response = {
-            "message": "User cannot be deleted from the database",
-
+            "message": "User does not exist in the database"
         }
         return jsonify(response), 400
+

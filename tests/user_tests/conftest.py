@@ -4,6 +4,7 @@ import string
 import pytest
 
 from tests.user_tests.config import UserService
+from tests.user_tests.static import SuccessfulResponses
 
 
 @pytest.fixture(autouse=True)
@@ -27,3 +28,13 @@ def create_user_body():
     user["is_admin"] = is_admin
 
     return user
+
+
+@pytest.fixture
+def create_user(create_user_body):
+    user = UserService().create_a_user(data=create_user_body)
+    assert user.status_code == 201
+    assert user.json()["message"] == SuccessfulResponses.created["message"]
+
+    return user, create_user_body
+
