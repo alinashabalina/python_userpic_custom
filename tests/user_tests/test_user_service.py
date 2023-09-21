@@ -18,3 +18,8 @@ def test_create_user_unsuccessful_field_missing(create_user_body):
         r = UserService().create_a_user(data=data)
         assert r.status_code == 400
         assert item in r.json()["message"]
+
+
+def test_create_user_unsuccessful_empty_body():
+    r = UserService().create_a_user(data={})
+    assert r.status_code == 400

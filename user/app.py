@@ -66,10 +66,16 @@ def create_user():
         return jsonify(response), 400
     except KeyError as e:
         db.session.rollback()
-        response = {
-            "message": f"Make sure you have filled the {e.args[0]} field",
+        if len(e.args) != 0:
+            response = {
+                "message": f"Make sure you have filled the {e.args[0]} field",
 
-        }
+            }
+        else:
+            response = {
+                "message": f"Oops something went wrong. Check that all the fields are filled",
+
+            }
         return jsonify(response), 400
 
 
