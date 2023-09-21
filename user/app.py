@@ -1,11 +1,13 @@
 import json
 
+import jsonschema
 import sqlalchemy
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 from sqlalchemy import select
 
 from models import init_app, db, User
+from schemas import ValidationSchemas
 
 app = Flask(__name__)
 
@@ -49,6 +51,7 @@ def get_user(user_id):
 def create_user():
     try:
         user = User()
+        jsonschema.validate(instance=json.loads(request.data), schema=ValidationSchemas.UserCreateSchema)
         user.username = json.loads(request.data)["username"]
         user.email = json.loads(request.data)["email"]
         user.is_admin = json.loads(request.data)["is_admin"]
@@ -73,9 +76,23 @@ def create_user():
             }
         else:
             response = {
-                "message": f"Oops something went wrong. Check that all the fields are filled",
+                "message": "Oops something went wrong. Check that all the fields are filled",
 
             }
+        return jsonify(response), 400
+    except jsonschema.exceptions.SchemaError as e:
+        db.session.rollback()
+        response = {
+            "message": f"Check that all the fields are filled {e.json_path}",
+
+        }
+        return jsonify(response), 400
+    except jsonschema.exceptions.ValidationError as e:
+        db.session.rollback()
+        response = {
+            "message": f"Validation error: {e.message}",
+
+        }
         return jsonify(response), 400
 
 

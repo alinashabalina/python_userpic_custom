@@ -3,6 +3,17 @@ import string
 
 import pytest
 
+from tests.user_tests.config import UserService
+
+
+@pytest.fixture(autouse=True)
+def service_availability():
+    service = UserService().check_service()
+    if service.status_code != 200:
+        raise Exception(f"Service is not available : status code {service.status_code}")
+    else:
+        pass
+
 
 @pytest.fixture
 def create_user_body():
