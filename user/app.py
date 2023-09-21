@@ -64,6 +64,13 @@ def create_user():
 
         }
         return jsonify(response), 400
+    except KeyError as e:
+        db.session.rollback()
+        response = {
+            "message": f"Make sure you have filled the {e.args[0]} field",
+
+        }
+        return jsonify(response), 400
 
 
 @app.route("/update/<user_id>", methods=["PUT"])
