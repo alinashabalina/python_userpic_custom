@@ -16,3 +16,7 @@ class SuccessfulResponses:
     created = {
         "message": "User created"
     }
+
+    updated = {
+        "message": "User successfully updated"
+    }

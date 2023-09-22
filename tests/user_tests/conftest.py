@@ -17,10 +17,25 @@ def service_availability():
 
 
 @pytest.fixture
-def create_user_body():
-    user = {}
-    username = ''.join(random.choices(string.ascii_lowercase, k=10))
+def generate_email():
     email = ''.join(random.choices(string.ascii_lowercase, k=5)) + "@gmail.com"
+
+    return email
+
+
+@pytest.fixture
+def generate_username():
+    username = ''.join(random.choices(string.ascii_lowercase, k=5)) + ' ' + ''.join(
+        random.choices(string.ascii_lowercase, k=5))
+
+    return username
+
+
+@pytest.fixture
+def create_user_body(generate_email, generate_username):
+    user = {}
+    username = generate_username
+    email = generate_email
     is_admin = random.choice([True, False])
 
     user["username"] = username
@@ -37,4 +52,3 @@ def create_user(create_user_body):
     assert user.json()["message"] == SuccessfulResponses.created["message"]
 
     return user, create_user_body
-

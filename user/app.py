@@ -43,7 +43,7 @@ def get_user(user_id):
         response = {
             "message": "Info successfully acquired",
             "result": user.user_info()
-            }
+        }
 
         return jsonify(response), 200
     except StopIteration:
@@ -108,6 +108,7 @@ def update_user(user_id):
     try:
         user_select = db.session.execute(select(User).filter_by(id=user_id))
         user = next(user_select)[0]
+        jsonschema.validate(instance=json.loads(request.data), schema=ValidationSchemas.UserCreateSchema)
         user.username = json.loads(request.data)["username"]
         user.email = json.loads(request.data)["email"]
         user.is_admin = json.loads(request.data)["is_admin"]
@@ -118,6 +119,13 @@ def update_user(user_id):
         db.session.rollback()
         response = {
             "message": "User with such data probably already exists in the database",
+
+        }
+        return jsonify(response), 400
+    except jsonschema.exceptions.ValidationError as e:
+        db.session.rollback()
+        response = {
+            "message": f"Validation error: {e.message}",
 
         }
         return jsonify(response), 400
@@ -140,4 +148,3 @@ def delete_user(user_id):
             "message": "User does not exist in the database"
         }
         return jsonify(response), 400
-

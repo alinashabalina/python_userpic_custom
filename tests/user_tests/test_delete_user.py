@@ -12,6 +12,12 @@ def test_delete_user_invalid_id(user_id):
     assert r.json() == Errors.user_not_in_the_database
 
 
+def test_delete_user_empty_id():
+    r = UserService().delete_a_user(user_id="")
+
+    assert r.status_code == 404
+
+
 def test_delete_user_successful(create_user):
     r = UserService().delete_a_user(user_id=create_user[0].json()["result"]["id"])
 
