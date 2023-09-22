@@ -2,16 +2,16 @@ class ValidationSchemas:
     GroupCreateSchema = {
         "type": "object",
         "properties": {
-            "username": {
+            "user_id": {
+                "type": "integer"
+            },
+            "group_name": {
                 "type": "string"
             },
-            "email": {
+            "userpic_link": {
                 "type": "string"
-            },
-            "is_admin": {
-                "type": "boolean"
             },
         },
-        "required": ["username", "email", "is_admin"],
+        "required": ["user_id", "group_name", "userpic_link"],
         "additionalProperties": False,
     }

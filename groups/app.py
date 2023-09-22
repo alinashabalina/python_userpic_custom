@@ -1,0 +1,35 @@
+import json
+
+import jsonschema
+import sqlalchemy
+from flask import Flask, jsonify, request
+from flask_migrate import Migrate
+
+from schemas import ValidationSchemas
+from models import init_app, db, Group
+
+app = Flask(__name__)
+
+app.config['SECRET_KEY'] = "opop"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./database/groups.db'
+init_app(app)
+migrate = Migrate(app, db)
+
+
+@app.route("/")
+def intro_page():
+    return ""
+
+
+@app.route("/group/create", methods=["POST"])
+def create_group():
+    group = Group()
+    jsonschema.validate(instance=json.loads(request.data), schema=ValidationSchemas.GroupCreateSchema)
+    group.user_id = json.loads(request.data)["user_id"]
+    group.group_name = json.loads(request.data)["group_name"]
+    group.userpic_link = json.loads(request.data)["userpic_link"]
+    db.session.add(group)
+    db.session.commit()
+    response = {"message": "Group created", "result": group.group_info()}
+    return jsonify(response), 201
