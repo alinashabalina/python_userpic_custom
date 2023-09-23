@@ -1,7 +1,7 @@
 import pytest
 
 from tests.user_tests.config import UserService
-from tests.user_tests.static import Errors, SuccessfulResponses
+from tests.static import Errors, SuccessfulResponses
 
 
 def _checks_400(r):

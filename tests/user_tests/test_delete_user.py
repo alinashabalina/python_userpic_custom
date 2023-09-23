@@ -1,7 +1,7 @@
 import pytest
 
 from tests.user_tests.config import UserService
-from tests.user_tests.static import Errors, SuccessfulResponses
+from tests.static import Errors, SuccessfulResponses
 
 
 @pytest.mark.parametrize("user_id", ["user_id", "0", True, None, 999])

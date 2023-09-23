@@ -24,12 +24,28 @@ def intro_page():
 
 @app.route("/group/create", methods=["POST"])
 def create_group():
-    group = Group()
-    jsonschema.validate(instance=json.loads(request.data), schema=ValidationSchemas.GroupCreateSchema)
-    group.user_id = json.loads(request.data)["user_id"]
-    group.group_name = json.loads(request.data)["group_name"]
-    group.userpic_link = json.loads(request.data)["userpic_link"]
-    db.session.add(group)
-    db.session.commit()
-    response = {"message": "Group created", "result": group.group_info()}
-    return jsonify(response), 201
+    try:
+        group = Group()
+        jsonschema.validate(instance=json.loads(request.data), schema=ValidationSchemas.GroupCreateSchema)
+        group.user_id = json.loads(request.data)["user_id"]
+        group.group_name = json.loads(request.data)["group_name"]
+        group.userpic_link = json.loads(request.data)["userpic_link"]
+        db.session.add(group)
+        db.session.commit()
+        response = {"message": "Group created", "result": group.group_info()}
+        return jsonify(response), 201
+
+    except jsonschema.exceptions.SchemaError as e:
+        db.session.rollback()
+        response = {
+            "message": f"Check that all the fields are filled {e.json_path}",
+
+        }
+        return jsonify(response), 400
+    except jsonschema.exceptions.ValidationError as e:
+        db.session.rollback()
+        response = {
+            "message": f"Validation error: {e.message}",
+
+        }
+        return jsonify(response), 400

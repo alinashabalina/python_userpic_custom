@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from tests.user_tests.config import UserService
-from tests.user_tests.static import SuccessfulResponses
+from tests.static import SuccessfulResponses
 
 
 def _checks_400(r):

@@ -7,6 +7,8 @@ class Errors:
         "message": "User does not exist in the database"
     }
 
+    user_id_required = {'message': "Validation error: 'user_id' is a required property"}
+
 
 class SuccessfulResponses:
     deleted = {
