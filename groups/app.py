@@ -1,7 +1,6 @@
 import json
 
 import jsonschema
-import sqlalchemy
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 
@@ -34,7 +33,6 @@ def create_group():
         db.session.commit()
         response = {"message": "Group created", "result": group.group_info()}
         return jsonify(response), 201
-
     except jsonschema.exceptions.SchemaError as e:
         db.session.rollback()
         response = {

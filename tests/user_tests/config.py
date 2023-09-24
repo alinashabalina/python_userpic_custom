@@ -7,6 +7,7 @@ class UserService:
     get_user_info_endpoint = "/user/info/"
     delete_user_endpoint = "/delete/"
     update_user_endpoint = "/update/"
+    create_a_group_endpoint = "/user/create/group"
 
     def __init__(self):
         pass
@@ -25,6 +26,10 @@ class UserService:
 
     def update_a_user(self, data, user_id):
         response = requests.put(self.url + self.update_user_endpoint + str(user_id), json=data)
+        return response
+
+    def create_a_group(self, data):
+        response = requests.post(self.url + self.create_a_group_endpoint, json=data)
         return response
 
     def check_service(self):

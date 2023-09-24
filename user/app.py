@@ -1,6 +1,7 @@
 import json
 
 import jsonschema
+import requests
 import sqlalchemy
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
@@ -10,6 +11,8 @@ from models import init_app, db, User
 from schemas import ValidationSchemas
 
 app = Flask(__name__)
+
+GROUPS_URL = "http://127.0.0.1:5001"
 
 app.config['SECRET_KEY'] = "opop"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -148,3 +151,20 @@ def delete_user(user_id):
             "message": "User does not exist in the database"
         }
         return jsonify(response), 400
+
+
+@app.route("/user/create/group", methods=["POST"])
+def create_group():
+    r = requests.post(GROUPS_URL + "/group/create", data=json.loads(request.data))
+    if r.status_code == 201:
+        response = {
+            "message": "Group successfully added"
+        }
+        return jsonify(response), 200
+    else:
+        response = {
+            "message": "Group is not added"
+        }
+        return jsonify(response), 400
+
+
