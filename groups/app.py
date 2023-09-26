@@ -4,8 +4,8 @@ import jsonschema
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 
-from schemas import ValidationSchemas
 from models import init_app, db, Group
+from schemas import ValidationSchemas
 
 app = Flask(__name__)
 

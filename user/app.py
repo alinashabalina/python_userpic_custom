@@ -155,16 +155,15 @@ def delete_user(user_id):
 
 @app.route("/user/create/group", methods=["POST"])
 def create_group():
-    r = requests.post(GROUPS_URL + "/group/create", data=json.loads(request.data))
+    r = requests.post(GROUPS_URL + "/group/create", json=json.loads(request.data))
     if r.status_code == 201:
         response = {
-            "message": "Group successfully added"
+            "message": "Group successfully added",
+            "result": r.json()["result"]
         }
-        return jsonify(response), 200
+        return jsonify(response), 201
     else:
         response = {
             "message": "Group is not added"
         }
         return jsonify(response), 400
-
-

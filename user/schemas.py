@@ -1,5 +1,5 @@
 class ValidationSchemas:
-    GroupCreateSchema = {
+    UserCreateSchema = {
         "type": "object",
         "properties": {
             "username": {

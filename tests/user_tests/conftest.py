@@ -3,8 +3,8 @@ import string
 
 import pytest
 
-from tests.user_tests.config import UserService
 from tests.static import SuccessfulResponses
+from tests.user_tests.config import UserService
 
 
 @pytest.fixture(autouse=True)
@@ -52,3 +52,17 @@ def create_user(create_user_body):
     assert user.json()["message"] == SuccessfulResponses.created["message"]
 
     return user, create_user_body
+
+
+@pytest.fixture
+def create_group_body(create_user):
+    group = {}
+    user_id = create_user[0].json()["result"]["id"]
+    group_name = ''.join(random.choices(string.ascii_lowercase, k=5))
+    userpic_link = ''.join(random.choices(string.ascii_lowercase, k=5))
+
+    group["user_id"] = user_id
+    group["group_name"] = group_name
+    group["userpic_link"] = userpic_link
+
+    return group, create_user[0].json()["result"]["id"]
