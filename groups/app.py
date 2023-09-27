@@ -29,6 +29,8 @@ def create_group():
         group.user_id = json.loads(request.data)["user_id"]
         group.group_name = json.loads(request.data)["group_name"]
         group.userpic_link = json.loads(request.data)["userpic_link"]
+        group.is_default = json.loads(request.data)["is_default"]
+        group.is_private = json.loads(request.data)["is_private"]
         db.session.add(group)
         db.session.commit()
         response = {"message": "Group created", "result": group.group_info()}

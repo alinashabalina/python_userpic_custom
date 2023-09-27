@@ -39,7 +39,11 @@ def test_update_user_unsuccessful_field_missing(create_user):
     data.pop("username")
     r = UserService().update_a_user(data=data, user_id=create_user[0].json()["result"]["id"])
 
-    _checks_400(r)
+    assert r.status_code == 200
+    assert r.json()["message"] == SuccessfulResponses.updated["message"]
+    assert r.json()["result"]["email"] == create_user[0].json()["result"]["email"]
+    assert r.json()["result"]["username"] == ""
+    assert r.json()["result"]["id"] == create_user[0].json()["result"]["id"]
 
 
 def test_update_user_unsuccessful_wrong_data_type(create_user):

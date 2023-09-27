@@ -117,9 +117,12 @@ def update_user(user_id):
         user_select = db.session.execute(select(User).filter_by(id=user_id))
         user = next(user_select)[0]
         jsonschema.validate(instance=json.loads(request.data), schema=ValidationSchemas.UserCreateSchema)
-        user.username = json.loads(request.data)["username"]
         user.email = json.loads(request.data)["email"]
         user.is_admin = json.loads(request.data)["is_admin"]
+        if "username" not in json.loads(request.data).keys():
+            user.username = ""
+        else:
+            user.username = json.loads(request.data)["username"]
         db.session.commit()
         response = {"message": f"User successfully updated", "result": user.user_info()}
         return jsonify(response), 200

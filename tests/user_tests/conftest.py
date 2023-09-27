@@ -60,9 +60,13 @@ def create_group_body(create_user):
     user_id = create_user[0].json()["result"]["id"]
     group_name = ''.join(random.choices(string.ascii_lowercase, k=5))
     userpic_link = ''.join(random.choices(string.ascii_lowercase, k=5))
+    is_default = random.choice([True, False])
+    is_private = not is_default
 
     group["user_id"] = user_id
     group["group_name"] = group_name
     group["userpic_link"] = userpic_link
+    group["is_default"] = is_default
+    group["is_private"] = is_private
 
     return group, create_user[0].json()["result"]["id"]

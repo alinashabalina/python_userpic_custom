@@ -14,13 +14,17 @@ class Group(db.Model):
     user_id = db.Column(db.Integer)
     group_name = db.Column(db.String(255))
     userpic_link = db.Column(db.String)
+    is_default = db.Column(db.Boolean)
+    is_private = db.Column(db.Boolean)
 
     def group_info(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
             "group_name": self.group_name,
-            "userpic_link": self.userpic_link
+            "userpic_link": self.userpic_link,
+            "is_default": self.is_default,
+            "is_private": self.is_private
         }
 
 
