@@ -62,9 +62,12 @@ def create_user():
     try:
         user = User()
         jsonschema.validate(instance=json.loads(request.data), schema=ValidationSchemas.UserCreateSchema)
-        user.username = json.loads(request.data)["username"]
-        user.email = json.loads(request.data)["email"]
         user.is_admin = json.loads(request.data)["is_admin"]
+        user.email = json.loads(request.data)["email"]
+        if "username" not in json.loads(request.data).keys():
+            user.username = ""
+        else:
+            user.username = json.loads(request.data)["username"]
         db.session.add(user)
         db.session.commit()
         response = {"message": "User created", "result": user.user_info()}
@@ -104,6 +107,8 @@ def create_user():
 
         }
         return jsonify(response), 400
+
+
 
 
 @app.route("/update/<user_id>", methods=["PUT"])

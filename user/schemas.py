@@ -12,6 +12,6 @@ class ValidationSchemas:
                 "type": "boolean"
             },
         },
-        "required": ["username", "email", "is_admin"],
+        "required": ["email", "is_admin"],
         "additionalProperties": False,
     }
