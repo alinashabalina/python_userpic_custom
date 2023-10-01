@@ -109,8 +109,6 @@ def create_user():
         return jsonify(response), 400
 
 
-
-
 @app.route("/update/<user_id>", methods=["PUT"])
 def update_user(user_id):
     try:
