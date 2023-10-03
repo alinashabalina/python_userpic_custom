@@ -84,20 +84,13 @@ def update_group(group_id):
 
 
 @app.route("/group/delete/<group_id>", methods=["DELETE"])
-def delete_user(group_id):
-    try:
-        group_select = db.session.execute(select(Group).filter_by(id=group_id))
-        group = next(group_select)[0]
-        db.session.delete(group)
-        db.session.commit()
-        response = {
-            "message": "Group successfully deleted"
-        }
-        return jsonify(response), 200
-    except StopIteration:
-        db.session.rollback()
-        response = {
-            "message": "Group does not exist in the database"
-        }
-        return jsonify(response), 400
+def delete(group_id):
+    group_select = db.session.execute(select(Group).filter_by(id=group_id))
+    group = next(group_select)[0]
+    db.session.delete(group)
+    db.session.commit()
+    response = {
+        "message": "Group successfully deleted"
+    }
+    return jsonify(response), 204
 
