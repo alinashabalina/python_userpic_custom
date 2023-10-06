@@ -28,14 +28,19 @@ def intro_page():
 
 @app.route("/all", methods=["GET"])
 def get_all_users():
-    all_users = User.query.all()
-    result = [user.all_info() for user in all_users]
-    response = {
-        "message": "All app users",
-        "result": result
-    }
-
-    return jsonify(response)
+    try:
+        count = request.args.get("count")
+        if int(count) > 0:
+            all_users = User.query.limit(int(count)).all()
+            result = [user.all_info() for user in all_users]
+            response = {"message": "All app users", "result": result}
+            return jsonify(response)
+        else:
+            response = {"message": "Enter the correct count number"}
+            return jsonify(response), 400
+    except ValueError:
+        response = {"message": "Count can only be a number"}
+        return jsonify(response), 400
 
 
 @app.route("/user/info/<user_id>", methods=["GET"])
