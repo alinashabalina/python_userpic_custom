@@ -12,11 +12,11 @@ class Errors:
     }
 
     wrong_count = {
-        "message": "Enter the correct count number"
+        "message": "Enter the correct limit/offset number"
     }
 
     count_not_number = {
-        "message": "Count can only be a number"
+        "message": "Limit/offset can only be a number"
     }
 
 

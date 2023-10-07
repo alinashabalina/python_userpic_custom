@@ -29,18 +29,31 @@ def intro_page():
 @app.route("/all", methods=["GET"])
 def get_all_users():
     try:
-        count = request.args.get("count")
-        if int(count) > 0:
-            all_users = User.query.limit(int(count)).all()
+        print(request.args.to_dict())
+        if "offset" in request.args.to_dict().keys() and "limit" in request.args.to_dict().keys():
+            offset = request.args.get("offset")
+            limit = request.args.get("limit")
+        elif "offset" in request.args.to_dict().keys() and "limit" not in request.args.to_dict().keys():
+            offset = request.args.get("offset")
+            limit = 100
+        elif "limit" in request.args.to_dict().keys() and "offset" not in request.args.to_dict().keys() :
+            offset = 0
+            limit = request.args.get("limit")
+        else:
+            offset = 0
+            limit = 1000
+        if int(limit) >= 0 and int(offset) >= 0:
+            all_users = User.query.limit(int(limit)).offset(int(offset)).all()
             result = [user.all_info() for user in all_users]
             response = {"message": "All app users", "result": result}
             return jsonify(response)
         else:
-            response = {"message": "Enter the correct count number"}
+            response = {"message": "Enter the correct limit/offset number"}
             return jsonify(response), 400
     except ValueError:
-        response = {"message": "Count can only be a number"}
+        response = {"message": "Limit/offset can only be a number"}
         return jsonify(response), 400
+
 
 
 @app.route("/user/info/<user_id>", methods=["GET"])
