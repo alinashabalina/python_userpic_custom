@@ -29,14 +29,13 @@ def intro_page():
 @app.route("/all", methods=["GET"])
 def get_all_users():
     try:
-        print(request.args.to_dict())
         if "offset" in request.args.to_dict().keys() and "limit" in request.args.to_dict().keys():
             offset = request.args.get("offset")
             limit = request.args.get("limit")
         elif "offset" in request.args.to_dict().keys() and "limit" not in request.args.to_dict().keys():
             offset = request.args.get("offset")
             limit = 100
-        elif "limit" in request.args.to_dict().keys() and "offset" not in request.args.to_dict().keys() :
+        elif "limit" in request.args.to_dict().keys() and "offset" not in request.args.to_dict().keys():
             offset = 0
             limit = request.args.get("limit")
         else:
@@ -46,14 +45,13 @@ def get_all_users():
             all_users = User.query.limit(int(limit)).offset(int(offset)).all()
             result = [user.all_info() for user in all_users]
             response = {"message": "All app users", "result": result}
-            return jsonify(response)
+            return jsonify(response), 200
         else:
             response = {"message": "Enter the correct limit/offset number"}
             return jsonify(response), 400
     except ValueError:
         response = {"message": "Limit/offset can only be a number"}
         return jsonify(response), 400
-
 
 
 @app.route("/user/info/<user_id>", methods=["GET"])
