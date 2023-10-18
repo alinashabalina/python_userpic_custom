@@ -2,6 +2,7 @@ import pytest
 
 from tests.user_tests.config import UserService
 from tests.static import Errors, SuccessfulResponses
+from tests.user_tests.db_config import DBConnect
 
 
 def _checks_400(r):
@@ -12,8 +13,12 @@ def _checks_400(r):
 def test_get_user_info_successful(create_user):
     r = UserService().get_user_info(user_id=create_user[0].json()["result"]["id"])
 
+    user_db_info = DBConnect().select_user_info_by_id(r.json()["result"]["id"])
+
     assert r.status_code == 200
     assert r.json()["result"]["id"] == create_user[0].json()["result"]["id"]
+    assert r.json()["result"]["email"] == user_db_info[0][2]
+    assert r.json()["result"]["username"] == user_db_info[0][1]
 
     r = UserService().delete_a_user(user_id=create_user[0].json()["result"]["id"])
 
@@ -32,3 +37,4 @@ def test_get_user_info_unsuccessful_user_empty():
     r = UserService().get_user_info(user_id="")
 
     assert r.status_code == 404
+
