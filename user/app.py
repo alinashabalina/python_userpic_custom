@@ -1,9 +1,13 @@
 import json
+import random
+import string
+from datetime import datetime
+from functools import wraps
 
 import jsonschema
 import requests
 import sqlalchemy
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect
 from flask_migrate import Migrate
 from sqlalchemy import select
 
@@ -22,8 +26,88 @@ migrate = Migrate(app, db)
 
 
 @app.route("/")
-def intro_page():
-    return ""
+def index_page():
+    response = {"message": "This page is empty"}
+    return jsonify(response), 200
+
+
+@app.route("/unlogged")
+def unlogged():
+    response = {"message": "You should log in before you make this request"}
+    return jsonify(response), 400
+
+
+@app.route("/login", methods=['POST'])
+def user_login():
+    if 'password' in json.loads(request.data).keys() or 'email' in json.loads(request.data).keys():
+        password = json.loads(request.data)['password']
+        email = json.loads(request.data)['email']
+        try:
+            user_select = db.session.execute(select(User).filter_by(email=email))
+            user = next(user_select)[0]
+            if user.all_info()['password'] == password:
+                message = {"message": "Successful authentication"}
+                status_code = 200
+                user.token = ''.join(random.choice(string.ascii_letters) for i in range(15))
+                user.token_issue_time = datetime.now().time()
+                db.session.commit()
+            else:
+                message = {"message": "A valid password or email is missing!"}
+                status_code = 401
+        except KeyError:
+            db.session.rollback()
+            response = {"message": "Make sure you are registered"}
+            return jsonify(response), 400
+
+        return jsonify(message), status_code
+    else:
+        return jsonify({"message": "A valid password or email is missing!"}), 401
+
+
+@app.route("/admin/login", methods=['POST'])
+def admin_login():
+    if 'password' in json.loads(request.data).keys() or 'email' in json.loads(request.data).keys():
+        password = json.loads(request.data)['password']
+        email = json.loads(request.data)['email']
+        user_select = db.session.execute(select(User).filter_by(email=email))
+        user = next(user_select)[0]
+        if user.all_info()['is_admin'] is True and user.all_info()['password'] == password:
+            try:
+                message = {"message": "Successful authentication"}
+                status_code = 200
+                user.token = ''.join(random.choice(string.ascii_letters) for i in range(15))
+                user.token_issue_time = datetime.now().time()
+                db.session.commit()
+                return jsonify(message), status_code
+            except KeyError:
+                return redirect("/unlogged")
+        else:
+            return redirect("/unlogged")
+    else:
+        return jsonify({"message": "A valid password or email is missing!"}), 401
+
+
+def login_check(f):
+    @wraps(f)
+    def decorator(**kwargs):
+        kwargs.pop('user_id')
+        try:
+            if 'x-auth-token' in request.headers or 'email' in request.headers:
+                token = request.headers['x-auth-token']
+                email = request.headers['email']
+                user_select = db.session.execute(select(User).filter_by(email=email))
+                user = next(user_select)[0]
+                if 'token' in user.login_info().keys() and user.login_info()['token'] == token:
+                    kwargs['user_id'] = user.id
+                    kwargs['result'] = user.login_info()
+                else:
+                    return redirect("/unlogged")
+            else:
+                return redirect("/unlogged")
+        except (KeyError, StopIteration):
+            return redirect("/unlogged")
+        return kwargs
+    return decorator
 
 
 @app.route("/all", methods=["GET"])
@@ -55,19 +139,20 @@ def get_all_users():
 
 
 @app.route("/user/info/<user_id>", methods=["GET"])
-def get_user(user_id):
+@login_check
+def get_user(**kwargs):
     try:
         user_select = db.session.execute(select(User).filter_by(id=user_id))
         user = next(user_select)[0]
         response = {
             "message": "Info successfully acquired",
-            "result": user.user_info()
+            "result": kwargs["result"]
         }
 
         return jsonify(response), 200
     except StopIteration:
         response = {
-            "message": "Enter a valid user_id",
+            "message": "Oops something went wrong",
         }
 
         return jsonify(response), 400
@@ -80,6 +165,7 @@ def create_user():
         jsonschema.validate(instance=json.loads(request.data), schema=ValidationSchemas.UserCreateSchema)
         user.is_admin = json.loads(request.data)["is_admin"]
         user.email = json.loads(request.data)["email"]
+        user.password = json.loads(request.data)["password"]
         if "username" not in json.loads(request.data).keys():
             user.username = ""
         else:

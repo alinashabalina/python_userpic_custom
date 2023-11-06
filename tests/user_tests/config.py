@@ -9,6 +9,8 @@ class UserService:
     update_user_endpoint = "/update/"
     create_a_group_endpoint = "/user/create/group"
     get_all_users_endpoint = "/all"
+    user_login_endpoint = "/login"
+    admin_login_endpoint = "/admin/login"
 
     def __init__(self):
         pass
@@ -17,8 +19,16 @@ class UserService:
         response = requests.post(self.url + self.create_user_endpoint, json=data)
         return response
 
-    def get_user_info(self, user_id):
-        response = requests.get(self.url + self.get_user_info_endpoint + str(user_id))
+    def user_login(self, data):
+        response = requests.post(self.url + self.user_login_endpoint, json=data)
+        return response
+
+    def admin_login(self, data):
+        response = requests.post(self.url + self.admin_login_endpoint, json=data)
+        return response
+
+    def get_user_info(self, user_id, headers):
+        response = requests.get(self.url + self.get_user_info_endpoint + str(user_id), headers=headers)
         return response
 
     def get_all_users(self, params):

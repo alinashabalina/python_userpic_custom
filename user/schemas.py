@@ -11,6 +11,9 @@ class ValidationSchemas:
             "is_admin": {
                 "type": "boolean"
             },
+            "password": {
+                "type": "string"
+            }
         },
         "required": ["email", "is_admin"],
         "additionalProperties": False,

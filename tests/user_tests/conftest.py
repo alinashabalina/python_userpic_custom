@@ -5,6 +5,7 @@ import pytest
 
 from tests.static import SuccessfulResponses
 from tests.user_tests.config import UserService
+from tests.user_tests.db_config import DBConnect
 
 
 @pytest.fixture(autouse=True)
@@ -32,7 +33,13 @@ def generate_username():
 
 
 @pytest.fixture
-def create_user_body(generate_email, generate_username):
+def generate_password():
+    password="password" + str(random.randint(1, 10000) + 1)
+    return password
+
+
+@pytest.fixture
+def create_user_body(generate_email, generate_username, generate_password):
     user = {}
     username = generate_username
     email = generate_email
@@ -41,6 +48,7 @@ def create_user_body(generate_email, generate_username):
     user["username"] = username
     user["email"] = email
     user["is_admin"] = is_admin
+    user["password"] = generate_password
 
     return user
 
@@ -52,6 +60,65 @@ def create_user(create_user_body):
     assert user.json()["message"] == SuccessfulResponses.created["message"]
 
     return user, create_user_body
+
+
+@pytest.fixture
+def create_admin(create_user_body):
+    create_user_body["is_admin"] = True
+
+    user = UserService().create_a_user(data=create_user_body)
+
+    assert user.status_code == 201
+    assert user.json()["message"] == SuccessfulResponses.created["message"]
+
+    return user, create_user_body
+
+
+@pytest.fixture
+def create_logged_in_user(create_user_body):
+    user = UserService().create_a_user(data=create_user_body)
+    assert user.status_code == 201
+    assert user.json()["message"] == SuccessfulResponses.created["message"]
+
+    email = user.json()["result"]["email"]
+    password = user.json()["result"]["password"]
+
+    data = {
+        "email": email,
+        "password": password
+    }
+
+    login = UserService().user_login(data=data)
+    assert login.status_code == 200
+
+    token = DBConnect().select_user_info_by_id(user_id=user.json()["result"]["id"])[0][5]
+
+    return user, create_user_body, token
+
+
+@pytest.fixture
+def create_logged_in_admin(create_user_body):
+    create_user_body["is_admin"] = True
+
+    user = UserService().create_a_user(data=create_user_body)
+
+    assert user.status_code == 201
+    assert user.json()["message"] == SuccessfulResponses.created["message"]
+
+    email = user.json()["result"]["email"]
+    password = user.json()["result"]["password"]
+
+    data = {
+        "email": email,
+        "password": password
+    }
+
+    login = UserService().admin_login(data=data)
+    assert login.status_code == 200
+
+    token = DBConnect().select_user_info_by_id(user_id=user.json()["result"]["id"])[0][5]
+
+    return user, create_user_body, token
 
 
 @pytest.fixture
